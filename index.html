@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>矩阵变换实验室 · Matrix Transformation Lab</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/style.css">
+  <script defer src="js/matrix.js"></script>
+  <script defer src="js/transform.js"></script>
+  <script defer src="js/renderer.js"></script>
+  <script defer src="js/animation.js"></script>
+  <script defer src="js/quiz.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand"><span aria-hidden="true">M</span><div><strong>矩阵变换实验室</strong><small lang="en">Matrix Transformation Lab</small></div></div>
+      <nav aria-label="学习导航">
+        <a href="#homogeneous">齐次坐标</a><a href="#lab" aria-current="page">变换实验室</a>
+        <a href="#animation">动态动画</a><a href="#composition">组合变换</a><a href="#quiz">知识检测</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <noscript><p class="card">请启用 JavaScript 以使用交互实验。</p></noscript>
+
+    <section id="homogeneous" aria-labelledby="homogeneous-title" hidden>
+      <header class="intro"><p class="eyebrow">原理学习 · 2.5.2</p><h1 id="homogeneous-title">齐次坐标</h1><p>为二维点补上一个分量，让平移也能写成一次矩阵乘法。</p></header>
+      <div class="split">
+        <div class="stack">
+          <article class="card">
+            <h2>从二维点到齐次点</h2>
+            <p>二维点 [2, 1]ᵀ 可写为齐次点 [2, 1, 1]ᵀ。补上的 1 是齐次分量，点仍位于平面中的 (2, 1)。</p>
+            <p>任意 2 × 2 线性变换都把原点映射到原点。非零平移会移动原点，因此无法直接用 2 × 2 矩阵左乘二维列向量来表示。补上的 1 让第三列中的平移量参与每行的乘加。</p>
+            <button type="button" id="lift" class="primary">转为齐次坐标</button>
+            <p id="lift-result" class="formula readout" aria-live="polite"></p>
+          </article>
+          <article class="card">
+            <h2>逐行计算 T · p</h2>
+            <div id="lesson-inputs" class="controls two"></div><div id="lesson-matrix"></div>
+            <p>每一行与列向量做点积。三行算完后，画布会标出平移后的点。</p>
+            <div id="lesson-rows" class="equations" aria-live="polite"></div>
+            <div class="actions"><button id="lesson-step" class="primary">计算下一行</button><button id="lesson-reset">重置演示</button></div>
+          </article>
+        </div>
+        <article class="card plot-card">
+          <div class="card-heading"><h2>点的平移</h2><div class="legend"><span>原始点</span><span>平移后</span></div></div>
+          <div id="lesson-plot"></div><p id="lesson-coordinate" class="formula readout"></p>
+        </article>
+      </div>
+    </section>
+
+    <section id="lab" aria-labelledby="lab-title">
+      <header class="intro"><p class="eyebrow">交互实验 · 2.5.1</p><h1 id="lab-title">二维图形变换实验室</h1><p>调整参数，观察图形、矩阵和顶点坐标如何同步变化。</p></header>
+      <div class="lab-layout">
+        <article class="card">
+          <h2>实验参数</h2>
+          <label class="field">初始图形<select id="lab-shape"><option value="triangle">三角形</option><option value="square">正方形</option></select></label>
+          <fieldset><legend>变换类型</legend><div id="lab-types" class="choices"></div></fieldset>
+          <div id="lab-inputs" class="controls"></div><p id="lab-note" class="help"></p>
+          <div class="actions"><button id="lab-play" class="primary">播放变换动画</button><button id="lab-reset">重置</button></div>
+          <p id="lab-progress" class="help" hidden></p>
+        </article>
+        <article class="card plot-card">
+          <div class="card-heading"><h2>图形与坐标</h2><div class="legend"><span>原始图形</span><span>变换后</span></div></div>
+          <div id="lab-plot"></div><p class="help plot-footer">x 轴向右，y 轴向上 · 每格 1 单位</p>
+        </article>
+        <article class="card"><h2>实时计算</h2><div id="lab-matrix"></div><div id="lab-vertices"></div></article>
+      </div>
+    </section>
+
+    <section id="animation" aria-labelledby="animation-title" hidden>
+      <header class="intro"><p class="eyebrow">过程观察 · 2.5.1 / 2.5.2</p><h1 id="animation-title">矩阵变换动态动画</h1><p>跟踪每一帧的矩阵和顶点，或逐行查看矩阵乘法的点积。</p></header>
+      <div class="split">
+        <article class="card plot-card">
+          <div class="card-heading"><h2>动画画布</h2><div class="legend"><span>原始图形</span><span>当前帧</span></div></div>
+          <div id="animation-plot"></div><div class="actions" id="animation-playback"></div><div id="animation-progress"></div>
+        </article>
+        <div class="stack">
+          <article class="card"><h2>动画设置</h2>
+            <label class="field">演示方式<select id="animation-mode">
+              <option value="translation">平移 (4, 2)</option><option value="rotation">逆时针旋转 90°</option>
+              <option value="scaling">缩放 (1.8, 0.5)</option><option value="product">逐行计算 T · p</option>
+            </select></label>
+            <label class="field">播放速度<select id="animation-speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+          </article>
+          <article class="card"><h2>矩阵与逐行计算</h2><div id="animation-matrix"></div><p id="animation-point" class="formula readout"></p><div id="animation-rows" class="equations"></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="composition" aria-labelledby="composition-title" hidden>
+      <header class="intro"><p class="eyebrow">顺序对比 · 2.5.1 / 2.5.2</p><h1 id="composition-title">矩阵组合变换</h1><p>从相同的三角形出发，比较平移与旋转交换顺序后的结果。</p></header>
+      <article class="card composition-controls">
+        <div id="composition-inputs" class="controls"></div>
+        <div><label class="check"><input id="use-center" type="checkbox"> 绕指定中心 C 旋转</label>
+          <div id="center-inputs" class="controls two" hidden></div><p id="center-note" class="help" hidden></p>
+          <div class="actions" id="composition-playback"></div><div id="composition-progress"></div>
+        </div>
+      </article>
+      <p class="legend"><span>原始图形</span><span>当前结果</span></p>
+      <div class="compare-grid">
+        <article class="card plot-card" id="experiment-a"><h2>A · 先平移，再旋转</h2><div class="experiment-plot"></div><p class="experiment-point formula readout"></p><div class="experiment-matrices"></div></article>
+        <article class="card plot-card" id="experiment-b"><h2>B · 先旋转，再平移</h2><div class="experiment-plot"></div><p class="experiment-point formula readout"></p><div class="experiment-matrices"></div></article>
+      </div>
+      <p class="card explanation" id="composition-explanation"></p>
+    </section>
+
+    <section id="quiz" aria-labelledby="quiz-title" hidden>
+      <header class="intro"><p class="eyebrow">学习自测</p><h1 id="quiz-title">知识检测</h1><p>完成 5 道单选题，提交后查看得分、正确答案和解析。</p></header>
+      <form id="quiz-form" class="quiz-layout">
+        <div id="quiz-questions" class="stack"></div>
+        <div class="card quiz-summary"><h2>答题结果</h2><p id="quiz-score" aria-live="polite"></p>
+          <div class="actions"><button type="submit" class="primary">提交答案</button><button type="reset">重新答题</button></div>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
